@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: SSM
+
+Parameters:
+  Prefix:
+    Type: String
+  S3BucketRegion:
+    Type: String
+    Default: ap-northeast-1
+
+Resources:
+  SSMAssociation:
+    Type: AWS::SSM::Association
+    Properties:
+      AssociationName: !Sub "${Prefix}-Association"
+      Name: AWS-GatherSoftwareInventory
+      Targets:
+        - Key: InstanceIds
+          Values:
+            - "*"
+  ResourceDataSync:
+    Type: 'AWS::SSM::ResourceDataSync'
+    Properties:
+      SyncName: !Sub "${Prefix}-Sync"
+      BucketRegion: !Ref S3BucketRegion
+      BucketName: !ImportValue S3LogBucketName
+      SyncFormat: JsonSerDe

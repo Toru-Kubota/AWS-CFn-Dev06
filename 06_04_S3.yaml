@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: ssm Log Bucket
+
+Parameters:
+  Prefix:
+    Type: String
+
+Resources:
+  S3Log:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${Prefix}-ssm-log"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - ServerSideEncryptionByDefault:
+            SSEAlgorithm: AES256
+
+  SBucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+        Bucket: !Ref S3Log
+        PolicyDocument: 
+          Version: "2012-10-17"
+          Statement: 
+            - Sid: SSMFullAccess
+              Effect: "Allow"
+              Principal:
+                Service:
+                  - ssm.amazonaws.com
+              Action: "s3:*"
+              Resource: 
+                - !Sub "arn:aws:s3:::${S3Log}"
+                - !Sub "arn:aws:s3:::${S3Log}/*"
+
+Outputs:
+  S3LogBucketName:
+    Value: !Ref S3Log
+    Export:
+      Name: S3LogBucketName
